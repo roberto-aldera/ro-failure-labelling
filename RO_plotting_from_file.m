@@ -20,7 +20,7 @@ for i = 2:num_instances
     total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
 end
 
-classification = classify_poses(xyz_yaw,total_xyz_yaw,num_instances);
+ classification = classify_poses(xyz_yaw,total_xyz_yaw,num_instances);
 
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
@@ -48,7 +48,7 @@ ylabel('m/s, degrees');
 legend('X speed', 'Y speed','Yaw rate');
 title('Speeds and yaw rates');
 
-diffMaxEVec = [zeros(1, b); diff(MaxEVec,1,1)];
+% diffMaxEVec = [zeros(1, b); diff(MaxEVec)];
 
 for i = 2:num_instances
     if(classification(i) == 1)
@@ -70,12 +70,12 @@ for i = 2:num_instances
     plot(MaxEVec(i,:),'.','Color',colour);
     
     sf(4) = subplot(2,2,4);
-    plot(diffMaxEVec(i,:), 'Color', colour);
+    plot(diff(MaxEVec(i,:)),'.','MarkerSize',1, 'Color', colour);
     hold on;
-    title('New');
+    title('diff(MaxEVec)');
     xlabel('Element index');
     ylabel('Magnitude');
-    pause(0.25);
+    pause(0.05);
 end
 
 h = zeros(2, 1);
