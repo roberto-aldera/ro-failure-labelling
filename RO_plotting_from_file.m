@@ -10,12 +10,8 @@ end_index = length(xyz_yaw_raw) - 0;
 xyz_yaw = xyz_yaw_raw(start_index:end_index,:);
 MaxEVec = MaxEVec_raw(start_index:end_index,:);
 
-C_matrix = C_matrix_raw(start_index:end_index,:);
-
 [a,b] = size(MaxEVec);
 num_instances = a;
-
-allCs = prepare_C_matrices(C_matrix_raw,num_instances);
 
 [m,n] = size(xyz_yaw);
 total_xyz_yaw = zeros(m,n);
@@ -24,25 +20,13 @@ for i = 2:num_instances
     total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
 end
 
+classification = classify_poses(total_xyz_yaw,num_instances);
+
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
 end
 
-classification = zeros(1,num_instances);
-LastSuccessfulPoints = [total_xyz_yaw(2,1),total_xyz_yaw(2,2); ...
-    total_xyz_yaw(1,1),total_xyz_yaw(1,2)];
-
-for i = 3:num_instances
-    CurrentPoints = [total_xyz_yaw(i-1,1),total_xyz_yaw(i-1,2); ...
-        total_xyz_yaw(i,1),total_xyz_yaw(i,2)];
-    PreviousPoints = [total_xyz_yaw(i-2,1),total_xyz_yaw(i-2,2); ...
-        total_xyz_yaw(i-1,1),total_xyz_yaw(i-1,2)];
-    if(pdist(CurrentPoints,'Euclidean')>(3*pdist(LastSuccessfulPoints,'Euclidean')))
-        classification(i) = 1;
-    else
-        LastSuccessfulPoints = PreviousPoints;
-    end
-end
+allCs = prepare_C_matrices(C_matrix_raw,num_instances);
 
 f1 = figure(3);
 clf;
