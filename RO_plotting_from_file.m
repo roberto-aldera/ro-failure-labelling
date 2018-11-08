@@ -1,4 +1,4 @@
-hasBeenRun = false;
+hasBeenRun = true;
 if(hasBeenRun == false)
     clear;clf;
     dateAndTime = "2018-11-06-17-09-38/";
@@ -15,24 +15,7 @@ C_matrix = C_matrix_raw(start_index:end_index,:);
 [a,b] = size(MaxEVec);
 num_instances = a;
 
-max_C_size = max(C_matrix_raw(:,1));
-current_C_matrix_size = C_matrix_raw(1,1);
-C_matrix_temp = C_matrix_raw(1:current_C_matrix_size, 1:current_C_matrix_size);
-blanks = max_C_size - current_C_matrix_size;
-D = padarray(C_matrix_temp,[blanks blanks],0,'post');
-allCs = D;
-num_processed = C_matrix_raw(1,1) + 1;
-current_C_matrix_size = C_matrix_raw(num_processed,1);
-
-for i = 2:num_instances
-    C_matrix_temp = C_matrix_raw(num_processed:(current_C_matrix_size+num_processed-1), ...
-        1:current_C_matrix_size);
-    blanks = max_C_size - current_C_matrix_size;
-    D = padarray(C_matrix_temp,[blanks blanks],0,'post');
-    allCs = cat(3,allCs,D);
-    num_processed = num_processed+current_C_matrix_size;
-    current_C_matrix_size = C_matrix_raw(num_processed,1);
-end
+allCs = prepare_C_matrices(C_matrix_raw,num_instances);
 
 [m,n] = size(xyz_yaw);
 total_xyz_yaw = zeros(m,n);
@@ -60,7 +43,6 @@ for i = 3:num_instances
         LastSuccessfulPoints = PreviousPoints;
     end
 end
-
 
 f1 = figure(3);
 clf;
@@ -104,7 +86,7 @@ for i = 2:num_instances
     plot(MaxEVec(i,:),'.','Color',colour);
     
     sf(4) = subplot(2,2,4);
-    temp_eigvals = eig(allCs(:,:,i));
+    temp_eigvals = eig(allCs{i});
     plot(temp_eigvals(temp_eigvals>0), 'Color', colour);
     hold on;
     title('Eigenvalues');
