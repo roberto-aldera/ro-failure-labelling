@@ -40,22 +40,12 @@ for i = 2:num_instances
     total_xyz_yaw(i,1) = total_xyz_yaw(i-1,1) + xyz_yaw(i,1);
     total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
 end
-%  figure(1);
-%  plot(total_xyz_yaw(:,1),total_xyz_yaw(:,2), 'o--','LineWidth',3, ...
-%         'MarkerEdgeColor','r');
-%  axis equal
-%
-% figure(2);
-% clf;
-%
+
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
-    %     plot(MaxEVec(i,:),'o');
-    %     hold on;
 end
 
 classification = zeros(1,num_instances);
-% LastSuccessfulPoints = [0,0;0,0];
 LastSuccessfulPoints = [total_xyz_yaw(2,1),total_xyz_yaw(2,2); ...
     total_xyz_yaw(1,1),total_xyz_yaw(1,2)];
 
@@ -64,7 +54,6 @@ for i = 3:num_instances
         total_xyz_yaw(i,1),total_xyz_yaw(i,2)];
     PreviousPoints = [total_xyz_yaw(i-2,1),total_xyz_yaw(i-2,2); ...
         total_xyz_yaw(i-1,1),total_xyz_yaw(i-1,2)];
-    %     LastSuccessfulPoints = PreviousPoints;
     if(pdist(CurrentPoints,'Euclidean')>(3*pdist(LastSuccessfulPoints,'Euclidean')))
         classification(i) = 1;
     else
@@ -92,16 +81,12 @@ xlabel('Pose iteration');
 ylabel('m/s, degrees');
 legend('X speed', 'Y speed','Yaw rate');
 title('Speeds and yaw rates');
-% t = linspace(0, num_instances, num_instances);
-
 
 % newTemp = [zeros(1, 1803); diff(MaxEVec,1,1)];
 
 for i = 2:num_instances
     if(classification(i) == 1)
         colour = 'r';
-        %     elseif(classification(i-1) == 1 && classification(i) == 0)
-        %         colour = 'g';
     else
         colour = 'b';
     end
@@ -118,14 +103,6 @@ for i = 2:num_instances
     hold on;
     plot(MaxEVec(i,:),'.','Color',colour);
     
-%     sf(3) = subplot(2,2,3);
-%     plot(t(i),xyz_yaw(i,1),'o--','Color',colour);
-%     hold on;
-%     plot(t(i),xyz_yaw(i,2),'o--','Color',colour);
-%     hold on;
-%     plot(t(i),xyz_yaw(i,4),'o--','Color',colour);
-%     hold on;
-    
     sf(4) = subplot(2,2,4);
     temp_eigvals = eig(allCs(:,:,i));
     plot(temp_eigvals(temp_eigvals>0), 'Color', colour);
@@ -140,26 +117,3 @@ h = zeros(2, 1);
 h(1) = plot(NaN,NaN,'or');
 h(2) = plot(NaN,NaN,'ob');
 legend(h, 'Failure','Success');
-
-% figure(4);
-% [v,d] = eig(allCs(:,:,1));
-% for i = 1:num_instances
-%     if(classification(i) == 1)
-%         colour = 'r';
-%     else
-%         colour = 'b';
-%     end
-%     temp_eigvals = eig(allCs(:,:,i));
-%
-%     plot(temp_eigvals, 'Color', colour);
-%     hold on;
-% end
-
-% figure(4);
-% plot(xyz_yaw(:,4),'o--');
-
-%  figure(2);
-%  plot(total_X_Y_Z_yaw(1,:),total_X_Y_Z_yaw(2,:), 'o--','LineWidth',3, ...
-%         'MarkerEdgeColor',classificationColour(2));
-
-
