@@ -1,12 +1,9 @@
-hasBeenRun = true;
+hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    % Read in values and plot them
     dateAndTime = "2018-11-06-17-09-38/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
-    xyz_yaw_raw = csvread(filename+'xyz_yaw.csv');
-    MaxEVec_raw = csvread(filename+'MaxEVec.csv');
-    C_matrix_raw = csvread(filename+'compatibility_matrix.csv');
+    [xyz_yaw_raw,MaxEVec_raw,C_matrix_raw] = load_ro_data_fn(filename);
 end
 start_index = 1;
 end_index = length(xyz_yaw_raw) - 0;
@@ -57,7 +54,7 @@ for i = 1:num_instances
     %     hold on;
 end
 
-% classification = zeros(1,num_instances);
+classification = zeros(1,num_instances);
 % LastSuccessfulPoints = [0,0;0,0];
 LastSuccessfulPoints = [total_xyz_yaw(2,1),total_xyz_yaw(2,2); ...
     total_xyz_yaw(1,1),total_xyz_yaw(1,2)];
@@ -69,7 +66,7 @@ for i = 3:num_instances
         total_xyz_yaw(i-1,1),total_xyz_yaw(i-1,2)];
     %     LastSuccessfulPoints = PreviousPoints;
     if(pdist(CurrentPoints,'Euclidean')>(3*pdist(LastSuccessfulPoints,'Euclidean')))
-%         classification(i) = 1;
+        classification(i) = 1;
     else
         LastSuccessfulPoints = PreviousPoints;
     end
@@ -98,7 +95,7 @@ title('Speeds and yaw rates');
 % t = linspace(0, num_instances, num_instances);
 
 
-newTemp = [zeros(1, 1803); diff(MaxEVec,1,1)];
+% newTemp = [zeros(1, 1803); diff(MaxEVec,1,1)];
 
 for i = 2:num_instances
     if(classification(i) == 1)
@@ -119,7 +116,7 @@ for i = 2:num_instances
     xlabel('Element index');
     ylabel('Eigenvector magnitude');
     hold on;
-    plot(newTemp(i,:),'.','Color',colour);
+    plot(MaxEVec(i,:),'.','Color',colour);
     
 %     sf(3) = subplot(2,2,3);
 %     plot(t(i),xyz_yaw(i,1),'o--','Color',colour);
