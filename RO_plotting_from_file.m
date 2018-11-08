@@ -1,9 +1,9 @@
-hasBeenRun = true;
+hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-06-17-09-38/";
+    dateAndTime = "2018-11-08-11-19-35/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
-    [xyz_yaw_raw,MaxEVec_raw,C_matrix_raw] = load_ro_data_fn(filename);
+    [xyz_yaw_raw,MaxEVec_raw] = load_ro_data_fn(filename);
 end
 start_index = 1;
 end_index = length(xyz_yaw_raw) - 0;
@@ -26,7 +26,7 @@ for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
 end
 
-allCs = prepare_C_matrices(C_matrix_raw,num_instances);
+% allCs = prepare_C_matrices(C_matrix_raw,num_instances);
 
 f1 = figure(3);
 clf;
@@ -48,7 +48,7 @@ ylabel('m/s, degrees');
 legend('X speed', 'Y speed','Yaw rate');
 title('Speeds and yaw rates');
 
-% newTemp = [zeros(1, 1803); diff(MaxEVec,1,1)];
+diffMaxEVec = [zeros(1, b); diff(MaxEVec,1,1)];
 
 for i = 2:num_instances
     if(classification(i) == 1)
@@ -70,13 +70,12 @@ for i = 2:num_instances
     plot(MaxEVec(i,:),'.','Color',colour);
     
     sf(4) = subplot(2,2,4);
-    temp_eigvals = eig(allCs{i});
-    plot(temp_eigvals(temp_eigvals>0), 'Color', colour);
+    plot(diffMaxEVec(i,:), 'Color', colour);
     hold on;
-    title('Eigenvalues');
+    title('New');
     xlabel('Element index');
-    ylabel('Eigenvalue magnitude');
-    pause(0.5);
+    ylabel('Magnitude');
+    pause(0.25);
 end
 
 h = zeros(2, 1);
