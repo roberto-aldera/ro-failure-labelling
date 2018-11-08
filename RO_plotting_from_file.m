@@ -20,7 +20,7 @@ for i = 2:num_instances
     total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
 end
 
-classification = classify_poses(total_xyz_yaw,num_instances);
+classification = classify_poses(xyz_yaw,total_xyz_yaw,num_instances);
 
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
