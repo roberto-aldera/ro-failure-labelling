@@ -53,6 +53,9 @@ title('Speeds and yaw rates');
 for i = 2:num_instances
     if(classification(i) == 1)
         colour = 'r';
+    elseif(i < (num_instances-2) && classification(i+2) == 1)
+        colour = 'c';
+        
     else
         colour = 'b';
     end
@@ -71,7 +74,7 @@ for i = 2:num_instances
     
     sf(4) = subplot(2,2,4);
     temp_eigvals = eig(allCs{i});
-    plot(temp_eigvals(temp_eigvals>0), 'Color', colour);
+    plot(temp_eigvals, 'Color', colour);
     hold on;
     title('Eigenvalues');
     xlabel('Element index');
@@ -83,3 +86,9 @@ h = zeros(2, 1);
 h(1) = plot(NaN,NaN,'or');
 h(2) = plot(NaN,NaN,'ob');
 legend(h, 'Failure','Success');
+
+% M = MaxEVec(1,1:1571);
+% mstar = M*allCs{1}*M';
+% [V,D] = eig(allCs{1});
+% [d,ind] = sort(diag(D));
+% figure; plot(d);
