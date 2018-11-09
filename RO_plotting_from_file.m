@@ -1,7 +1,7 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-08-11-19-35/";
+    dateAndTime = "2018-11-08-13-31-06/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
     [xyz_yaw_raw,MaxEVec_raw] = load_ro_data_fn(filename);
 end
@@ -53,11 +53,13 @@ title('Speeds and yaw rates');
 for i = 2:num_instances
     if(classification(i) == 1)
         colour = 'r';
+    elseif(i < (num_instances-2) && classification(i+2) == 1)
+        colour = 'c';
     else
         colour = 'b';
     end
     sf(1) = subplot(2,2,1);
-    title('Poses for RO performance Blenheim loop 3 - 15-08-2018, around frame 2220');
+    title('Poses for RO performance Blenheim loop 2 - 15-08-2018, around frame 2280');
     hold on;
     plot(total_xyz_yaw(i,1),total_xyz_yaw(i,2), 'o','LineWidth',3,'MarkerEdgeColor',colour);
     axis equal
@@ -67,15 +69,15 @@ for i = 2:num_instances
     xlabel('Element index');
     ylabel('Eigenvector magnitude');
     hold on;
-    plot(MaxEVec(i,:),'.','Color',colour);
+    plot(MaxEVec(i,:),'.','MarkerSize',1,'Color',colour);
     
     sf(4) = subplot(2,2,4);
-    plot(diff(MaxEVec(i,:)),'.','MarkerSize',1, 'Color', colour);
+    plot(MaxEVec(i-1,:) - (MaxEVec(i,:)),'.','MarkerSize',1,'Color',colour);
     hold on;
-    title('diff(MaxEVec)');
+    title('test(MaxEVec)');
     xlabel('Element index');
     ylabel('Magnitude');
-    pause(0.05);
+    pause(0.5);
 end
 
 h = zeros(2, 1);
