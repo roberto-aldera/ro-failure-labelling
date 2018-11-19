@@ -1,7 +1,7 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-08-13-31-06/";
+    dateAndTime = "2018-11-19-14-14-58/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
     [xyz_yaw_raw,MaxEVec_raw] = load_ro_data_fn(filename);
 end
@@ -20,7 +20,7 @@ for i = 2:num_instances
     total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
 end
 
- classification = classify_poses(xyz_yaw,total_xyz_yaw,num_instances);
+classification = classify_poses(xyz_yaw,total_xyz_yaw,num_instances);
 
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
@@ -49,17 +49,23 @@ legend('X speed', 'Y speed','Yaw rate');
 title('Speeds and yaw rates');
 
 % diffMaxEVec = [zeros(1, b); diff(MaxEVec)];
-
+previous_was_failure = false;
 for i = 2:num_instances
     if(classification(i) == 1)
         colour = 'r';
     elseif(i < (num_instances-2) && classification(i+2) == 1)
         colour = 'c';
+        classification(i) = 1;
+        previous_was_failure = true;
+    elseif(i < (num_instances-1) && previous_was_failure == true && classification(i) == 0)
+        colour = 'c';
+        classification(i) = 1;
+        previous_was_failure = false;
     else
         colour = 'b';
     end
     sf(1) = subplot(2,2,1);
-    title('Poses for RO performance Blenheim loop 2 - 15-08-2018, around frame 2280');
+    title('Poses for RO performance');
     hold on;
     plot(total_xyz_yaw(i,1),total_xyz_yaw(i,2), 'o','LineWidth',3,'MarkerEdgeColor',colour);
     axis equal
@@ -67,20 +73,24 @@ for i = 2:num_instances
     sf(2) = subplot(2,2,2);
     title('Eigenvectors');
     xlabel('Element index');
-    ylabel('Eigenvector magnitude');
+    ylabel('Eigenvector element magnitude');
     hold on;
     plot(MaxEVec(i,:),'.','MarkerSize',1,'Color',colour);
     
     sf(4) = subplot(2,2,4);
-    plot(MaxEVec(i-1,:) - (MaxEVec(i,:)),'.','MarkerSize',1,'Color',colour);
+    plot(diff((MaxEVec(i,:))),'.','MarkerSize',1,'Color',colour);
+    %     plot(MaxEVec(i-1,:) - (MaxEVec(i,:)),'.','MarkerSize',1,'Color',colour);
     hold on;
     title('test(MaxEVec)');
     xlabel('Element index');
     ylabel('Magnitude');
-    pause(0.5);
+%     pause(0.5);
 end
 
 h = zeros(2, 1);
 h(1) = plot(NaN,NaN,'or');
 h(2) = plot(NaN,NaN,'ob');
 legend(h, 'Failure','Success');
+
+csvwrite(filename+'sorted_eigenvectors.csv',MaxEVec);
+csvwrite(filename+'labels.csv',classification);
