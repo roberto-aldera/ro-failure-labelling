@@ -1,9 +1,9 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-19-14-14-58/";
+    dateAndTime = "2018-11-21-17-09-50/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
-    [xyz_yaw_raw,MaxEVec_raw] = load_ro_data_fn(filename);
+    [xyz_yaw_raw,MaxEVec_raw,C_matrix_raw] = load_ro_data_fn(filename);
 end
 start_index = 1;
 end_index = length(xyz_yaw_raw) - 0;
@@ -26,9 +26,9 @@ for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
 end
 
-% allCs = prepare_C_matrices(C_matrix_raw,num_instances);
+allCs = prepare_C_matrices(C_matrix_raw,num_instances);
 
-f1 = figure(3);
+f1 = figure(1);
 clf;
 colour = [];
 sf(1) = subplot(2,2,1);
@@ -78,13 +78,20 @@ for i = 2:num_instances
     plot(MaxEVec(i,:),'.','MarkerSize',1,'Color',colour);
     
     sf(4) = subplot(2,2,4);
-    plot(diff((MaxEVec(i,:))),'.','MarkerSize',1,'Color',colour);
+    %     plot(diff((MaxEVec(i,:))),'.','MarkerSize',1,'Color',colour);
     %     plot(MaxEVec(i-1,:) - (MaxEVec(i,:)),'.','MarkerSize',1,'Color',colour);
+    temp_eigvals = eig(allCs{i});
+    plot(temp_eigvals(temp_eigvals>0), 'Color', colour);
     hold on;
-    title('test(MaxEVec)');
+    title('Eigenvalues');
     xlabel('Element index');
-    ylabel('Magnitude');
-%     pause(0.5);
+    ylabel('Eigenvalue magnitude');
+    
+    %     hold on;
+    %     title('test(MaxEVec)');
+    %     xlabel('Element index');
+    %     ylabel('Magnitude');
+    %     pause(0.5);
 end
 
 h = zeros(2, 1);
