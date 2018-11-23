@@ -1,7 +1,7 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-21-17-09-50/";
+    dateAndTime = "2018-11-21-17-44-28/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
     [xyz_yaw_raw,MaxEVec_raw,C_matrix_raw] = load_ro_data_fn(filename);
 end
@@ -15,12 +15,32 @@ num_instances = a;
 
 [m,n] = size(xyz_yaw);
 total_xyz_yaw = zeros(m,n);
+
+angle_offset = 0;
+vel = sqrt(xyz_yaw_raw(:,1).^2+xyz_yaw_raw(:,2).^2);
+
 for i = 2:num_instances
-    total_xyz_yaw(i,1) = total_xyz_yaw(i-1,1) + xyz_yaw(i,1);
-    total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
+    total_xyz_yaw(i,4) = total_xyz_yaw(i-1,4) + xyz_yaw(i,4);
 end
 
-classification = classify_poses(xyz_yaw,total_xyz_yaw,num_instances);
+for i = 1:num_instances
+    yaw = total_xyz_yaw(i,4) + angle_offset;
+    xyz_yaw(i,1) = vel(i)*cos(yaw);
+    xyz_yaw(i,2) = vel(i)*sin(yaw);
+    if(i>2)
+        total_xyz_yaw(i,1) = total_xyz_yaw(i-1,1) + xyz_yaw(i,1);
+        total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
+    end
+end
+
+local_xyz_yaw = zeros(m,n);
+for i = 1:num_instances
+    local_xyz_yaw(i,1) = vel(i)*cos(xyz_yaw(i,4));
+    local_xyz_yaw(i,2) = vel(i)*sin(xyz_yaw(i,4));
+    local_xyz_yaw(i,4) = xyz_yaw(i,4);
+end
+
+classification = classify_poses(local_xyz_yaw,num_instances);
 
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
