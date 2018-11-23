@@ -1,7 +1,7 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-22-17-42-47/";
+    dateAndTime = "2018-11-23-12-47-31/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
     [xyz_yaw_raw,MaxEVec_raw] = load_ro_data_fn(filename);
 end
@@ -16,35 +16,42 @@ num_instances = a;
 [m,n] = size(xyz_yaw);
 total_xyz_yaw = zeros(m,n);
 
-angle_offset = 0;
+angle_offset = -deg2rad(atand(xyz_yaw_raw(1,1)/xyz_yaw_raw(1,2)));
 vel = sqrt(xyz_yaw_raw(:,1).^2+xyz_yaw_raw(:,2).^2);
 
 for i = 2:num_instances
     total_xyz_yaw(i,4) = total_xyz_yaw(i-1,4) + xyz_yaw(i,4);
 end
 
+RR = [cos(angle_offset), -sin(angle_offset); sin(angle_offset), cos(angle_offset)];
+yaw = zeros(m);
+xyz_yaw_world = zeros(m,n);
 for i = 1:num_instances
-    yaw = total_xyz_yaw(i,4) + angle_offset;
-    xyz_yaw(i,1) = vel(i)*cos(yaw);
-    xyz_yaw(i,2) = vel(i)*sin(yaw);
+    yaw(i) = total_xyz_yaw(i,4) - angle_offset;
+    xyz_yaw_world(i,1) = vel(i)*cos(yaw(i));
+    xyz_yaw_world(i,2) = vel(i)*sin(yaw(i));
+    
     if(i>2)
-        total_xyz_yaw(i,1) = total_xyz_yaw(i-1,1) + xyz_yaw(i,1);
-        total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw(i,2);
+        total_xyz_yaw(i,1) = total_xyz_yaw(i-1,1) + xyz_yaw_world(i,1);
+        total_xyz_yaw(i,2) = total_xyz_yaw(i-1,2) + xyz_yaw_world(i,2);
     end
+    xyz_yaw(i, 1:2) = (RR * xyz_yaw(i, 1:2)')';
 end
 
-local_xyz_yaw = zeros(m,n);
-for i = 1:num_instances
-    local_xyz_yaw(i,1) = vel(i)*cos(xyz_yaw(i,4));
-    local_xyz_yaw(i,2) = vel(i)*sin(xyz_yaw(i,4));
-    local_xyz_yaw(i,4) = xyz_yaw(i,4);
-end
+% local_xyz_yaw = zeros(m,n);
+% for i = 1:num_instances
+%     local_xyz_yaw(i,1) = vel(i)*cos(yaw(i));
+%     local_xyz_yaw(i,2) = vel(i)*sin(yaw(i));
+% %     local_xyz_yaw(i,1) = vel(i)*cos(xyz_yaw(i,4));
+% %     local_xyz_yaw(i,2) = vel(i)*sin(xyz_yaw(i,4));
+%     local_xyz_yaw(i,4) = xyz_yaw(i,4);
+% end
 % figure(2);clf;
 % plot(local_xyz_yaw(:,1),'*');
 % hold on;
 % plot(local_xyz_yaw(:,2),'*');
 
-classification = classify_poses(local_xyz_yaw,num_instances);
+classification = classify_poses(xyz_yaw,num_instances);
 
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
