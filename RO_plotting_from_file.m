@@ -1,7 +1,7 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-21-17-44-28/";
+    dateAndTime = "2018-11-23-13-48-07/"; % or 2018-11-21-17-44-28
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
     [xyz_yaw_raw,MaxEVec_raw,C_matrix_raw] = load_ro_data_fn(filename);
 end
