@@ -1,10 +1,11 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-23-12-47-31/";
+    dateAndTime = "2018-11-26-14-48-08/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
     [xyz_yaw_raw,MaxEVec_raw] = load_ro_data_fn(filename);
 end
+
 start_index = 1;
 end_index = length(xyz_yaw_raw) - 0;
 xyz_yaw = xyz_yaw_raw(start_index:end_index,:);
@@ -57,6 +58,15 @@ for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
 end
 
+y1 = zeros(a,25);
+for i = 1:num_instances
+    y1(i,:) = linspace(0,nnz(MaxEVec_raw(i,:)),25);
+end
+vq = zeros(13,25);
+for i = 1:num_instances
+    sample_points = 1:nnz(MaxEVec_raw(i,:));
+    vq(i,:) = interp1(sample_points,nonzeros(MaxEVec(i,:)),y1(i,:));
+end
 % allCs = prepare_C_matrices(C_matrix_raw,num_instances);
 
 f1 = figure(1);
@@ -125,3 +135,10 @@ legend(h, 'Failure','Success');
 
 csvwrite(filename+'sorted_eigenvectors.csv',MaxEVec);
 csvwrite(filename+'labels.csv',classification);
+
+figure(2);
+hold on;
+for i = 1:num_instances
+    plot(MaxEVec(i,:));
+    scatter(y1(i,:),vq(i,:));
+end
