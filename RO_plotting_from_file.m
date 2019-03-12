@@ -1,7 +1,7 @@
 hasBeenRun = false;
 if(hasBeenRun == false)
     clear;clf;
-    dateAndTime = "2018-11-23-12-47-31/";
+    dateAndTime = "2019-01-29-10-25-49/";
     filename = '/Users/roberto/data/RO-logging/'+dateAndTime;
     [xyz_yaw_raw,MaxEVec_raw] = load_ro_data_fn(filename);
 end
@@ -16,7 +16,7 @@ num_instances = a;
 [m,n] = size(xyz_yaw);
 total_xyz_yaw = zeros(m,n);
 
-angle_offset = -deg2rad(atand(xyz_yaw_raw(1,1)/xyz_yaw_raw(1,2)));
+angle_offset = -deg2rad(atand(xyz_yaw_raw(1,1)/xyz_yaw_raw(1,2))) + pi/2;
 vel = sqrt(xyz_yaw_raw(:,1).^2+xyz_yaw_raw(:,2).^2);
 
 for i = 2:num_instances
@@ -50,8 +50,9 @@ end
 % plot(local_xyz_yaw(:,1),'*');
 % hold on;
 % plot(local_xyz_yaw(:,2),'*');
+failure_label = 1;
 
-classification = classify_poses(xyz_yaw,num_instances);
+classification = classify_poses(xyz_yaw,num_instances,failure_label);
 
 for i = 1:num_instances
     MaxEVec(i,:) = sort(MaxEVec(i,:),'descend');
@@ -82,15 +83,15 @@ title('Speeds and yaw rates');
 % diffMaxEVec = [zeros(1, b); diff(MaxEVec)];
 previous_was_failure = false;
 for i = 2:num_instances
-    if(classification(i) == 1)
+    if(classification(i) == failure_label)
         colour = 'r';
-    elseif(i < (num_instances-2) && classification(i+2) == 1)
-        colour = 'c';
-        classification(i) = 1;
+    elseif(i < (num_instances-2) && classification(i+2) == failure_label)
+        colour = 'r'; % was cyan
+        classification(i) = failure_label;
         previous_was_failure = true;
-    elseif(i < (num_instances-1) && previous_was_failure == true && classification(i) == 0)
-        colour = 'c';
-        classification(i) = 1;
+    elseif(i < (num_instances-1) && previous_was_failure == true && classification(i) == -failure_label)
+        colour = 'r'; % was cyan
+        classification(i) = failure_label;
         previous_was_failure = false;
     else
         colour = 'b';
@@ -109,13 +110,14 @@ for i = 2:num_instances
     plot(MaxEVec(i,:),'.','MarkerSize',1,'Color',colour);
     
     sf(4) = subplot(2,2,4);
-    plot(diff((MaxEVec(i,:))),'.','MarkerSize',1,'Color',colour);
-    %     plot(MaxEVec(i-1,:) - (MaxEVec(i,:)),'.','MarkerSize',1,'Color',colour);
+    % plot(diff((MaxEVec(i,:))),'.','MarkerSize',1,'Color',colour);
+    % plot(MaxEVec(i-1,:) - (MaxEVec(i,:)),'.','MarkerSize',1,'Color',colour);
+    plot(i,sum(MaxEVec(i,:)),'.','MarkerSize',10,'Color',colour);
     hold on;
-    title('test(MaxEVec)');
+    title('sum of MaxEVec elements');
     xlabel('Element index');
     ylabel('Magnitude');
-    pause(0.01);
+     pause(0.2);
 end
 
 h = zeros(2, 1);
@@ -123,5 +125,8 @@ h(1) = plot(NaN,NaN,'or');
 h(2) = plot(NaN,NaN,'ob');
 legend(h, 'Failure','Success');
 
-csvwrite(filename+'sorted_eigenvectors.csv',MaxEVec);
-csvwrite(filename+'labels.csv',classification);
+combined_data = horzcat(classification', MaxEVec);
+
+% csvwrite(filename+'sorted_eigenvectors.csv',MaxEVec);
+% csvwrite(filename+'labels.csv',classification);
+csvwrite(filename+'combined_data.csv',combined_data);
