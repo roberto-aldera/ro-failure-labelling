@@ -1,4 +1,6 @@
 # ro-failure-labelling
+⚠️ Messy research code 👨‍🎓
+
 Some rough MATLAB scripts used when generating labels for RO failures as part of very early work that later become introspective Radar Odometry (RO).
 
 ## ITSC 2019 publication
